@@ -48,7 +48,6 @@ struct ToDo {
 bool
 doRequestAndSaveDataToMySQL(Poco::Net::HTTPClientSession &httpClientSession, Poco::Net::HTTPRequest &request,
                             Poco::Net::HTTPResponse &response) {
-    // register SQLite connector
     Poco::Data::MySQL::Connector::registerConnector();
 
     std::string str = "host=localhost;db=phpcpptodos;user=root;password=Scopic99!59ad5d1-;compress=true;auto-reconnect=true";
@@ -57,7 +56,6 @@ doRequestAndSaveDataToMySQL(Poco::Net::HTTPClientSession &httpClientSession, Poc
     session << "DROP TABLE IF EXISTS todos", now;
     session << "CREATE TABLE todos (id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, userId INTEGER(6), title VARCHAR(255), completed TINYINT)", now;
 
-    // (re)create table
     httpClientSession.sendRequest(request);
     std::istream &rs = httpClientSession.receiveResponse(response);
 
