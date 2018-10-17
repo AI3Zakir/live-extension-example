@@ -22,6 +22,8 @@ using Poco::StreamCopier;
 using Poco::Path;
 using Poco::URI;
 using Poco::Exception;
+using Poco::JSON::Parser;
+using Poco::JSON::ParseHandler;
 using namespace Poco::JSON;
 using Poco::Dynamic::Var;
 
@@ -36,9 +38,9 @@ using Poco::Dynamic::Var;
 bool
 doRequest(Poco::Net::HTTPClientSession &session, Poco::Net::HTTPRequest &request, Poco::Net::HTTPResponse &response) {
     session.sendRequest(request);
-    std::istream &rs = session.receiveResponse(response);
+    std::istream& rs = session.receiveResponse(response);
 
-    Php::out << response.getStatus() << " " << response.getReason() << std::endl;
+    Php::out << response.getStatus() << " - " << response.getReason() << std::endl;
     if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED) {
         std::string responseStr;
         StreamCopier::copyToString(rs, responseStr);

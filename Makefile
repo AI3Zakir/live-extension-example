@@ -88,7 +88,7 @@ LINKER				=	g++
 COMPILER_FLAGS		=	-Wall -c -O2 -std=c++11 -fpic -o
 LINKER_FLAGS		=	-shared
 INCLUDE_AND_LIB 	=	-I/usr/local/include/Poco -L/usr/local/lib
-LINKER_DEPENDENCIES	=	-lphpcpp -lPocoFoundation -lPocoNet  -lPocoNetSSL -lPocoUtil -lPocoData
+LINKER_DEPENDENCIES	=	-lphpcpp -lPocoFoundation -lPocoNet  -lPocoNetSSL -lPocoUtil -lPocoData -lPocoJSON
 
 
 #
