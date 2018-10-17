@@ -114,8 +114,8 @@ Php::Value make_request_with_cpp(Php::Parameters &params) {
     HTTPResponse response;
 
     if (!doRequestAndSaveDataToMySQL(session, request, response)) {
-        std::cerr << "Invalid Request." << std::endl;
-        return 1;
+        Php::out << "Invalid Request." << std::endl;
+        return "NOT FETCHED";
     }
 
     return "FETCHED";
