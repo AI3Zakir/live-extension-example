@@ -52,7 +52,7 @@ doRequestAndSaveDataToMySQL(Poco::Net::HTTPClientSession &httpClientSession, Poc
     // register SQLite connector
     Poco::Data::MySQL::Connector::registerConnector();
 
-    std::string str = "host=127.0.0.1;db=phpcpptodos;user=root;password=Scopic99!59ad5d1-;compress=true;auto-reconnect=true";
+    std::string str = "host=localhost;db=phpcpptodos;user=root;password=Scopic99!59ad5d1-;compress=true;auto-reconnect=true";
     Poco::Data::Session session(Poco::Data::SessionFactory::instance().create(Poco::Data::MySQL::Connector::KEY, str));
 
     session << "DROP TABLE IF EXISTS todos", now;
