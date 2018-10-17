@@ -117,6 +117,8 @@ Php::Value make_request_with_cpp(Php::Parameters &params) {
         std::cerr << "Invalid Request." << std::endl;
         return 1;
     }
+
+    return "FETCHED";
 }
 
 /**
