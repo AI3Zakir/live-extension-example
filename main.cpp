@@ -51,7 +51,7 @@ doRequest(Poco::Net::HTTPClientSession &session, Poco::Net::HTTPRequest &request
         Array::ConstIterator it;
 
         for (it = arr->begin(); it != arr->end(); it++) {
-            Php::out << "my children:" << it->convert<std::string>() << std::endl;
+            Php::out << "todo:" << it->convert<std::string>() << std::endl;
         }
 
         return true;
@@ -82,6 +82,8 @@ Php::Value make_request_with_cpp(Php::Parameters &params) {
         std::cerr << "Invalid Request." << std::endl;
         return 1;
     }
+
+    return 1;
 }
 
 /**
