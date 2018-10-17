@@ -8,11 +8,16 @@
 #include <Poco/Exception.h>
 #include <Poco/JSON/Parser.h>
 #include <Poco/Dynamic/Var.h>
+#include <Poco/Data/Session.h>
+#include <Poco/Data/SessionFactory.h>
+#include <Poco/Data/MySQL/Connector.h>
+#include <Poco/Data/MySQL/MySQLException.h>
 #include <phpcpp.h>
 #include <iostream>
 #include <cstdlib>
 #include <pthread.h>
 #include <unistd.h>
+#include <mysql/mysql.h>
 
 using Poco::Net::HTTPClientSession;
 using Poco::Net::HTTPRequest;
@@ -26,19 +31,36 @@ using Poco::JSON::Parser;
 using Poco::JSON::ParseHandler;
 using namespace Poco::JSON;
 using Poco::Dynamic::Var;
+using namespace Poco::Data::Keywords;
+struct ToDo {
+    int id;
+    int userId;
+    std::string title;
+    bool completed;
+};
 
-/**
- * Make request with POCO
- *
- * @param session
+
+/** *
+ * @param httpClientSession
  * @param request
  * @param response
  * @return
  */
 bool
-doRequest(Poco::Net::HTTPClientSession &session, Poco::Net::HTTPRequest &request, Poco::Net::HTTPResponse &response) {
-    session.sendRequest(request);
-    std::istream& rs = session.receiveResponse(response);
+doRequestAndSaveDataToMySQL(Poco::Net::HTTPClientSession &httpClientSession, Poco::Net::HTTPRequest &request,
+                            Poco::Net::HTTPResponse &response) {
+    // register SQLite connector
+    Poco::Data::MySQL::Connector::registerConnector();
+
+    std::string str = "host=127.0.0.1;db=phpcpptodos;user=root;password=Scopic99!59ad5d1-;compress=true;auto-reconnect=true";
+    Poco::Data::Session session(Poco::Data::SessionFactory::instance().create(Poco::Data::MySQL::Connector::KEY, str));
+
+    session << "DROP TABLE IF EXISTS todos", now;
+    session << "CREATE TABLE todos (id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, userId INTEGER(3), title VARCHAR(30), completed TINYINT)", now;
+
+    // (re)create table
+    httpClientSession.sendRequest(request);
+    std::istream &rs = httpClientSession.receiveResponse(response);
 
     Php::out << response.getStatus() << " - " << response.getReason() << std::endl;
     if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED) {
@@ -78,7 +100,7 @@ Php::Value make_request_with_cpp(Php::Parameters &params) {
     HTTPRequest request(HTTPRequest::HTTP_GET, path, HTTPMessage::HTTP_1_1);
     HTTPResponse response;
 
-    if (!doRequest(session, request, response)) {
+    if (!doRequestAndSaveDataToMySQL(session, request, response)) {
         std::cerr << "Invalid Request." << std::endl;
         return 1;
     }
