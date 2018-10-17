@@ -33,7 +33,6 @@ using namespace Poco::JSON;
 using Poco::Dynamic::Var;
 using namespace Poco::Data::Keywords;
 struct ToDo {
-    int id;
     int userId;
     std::string title;
     bool completed;
@@ -56,13 +55,12 @@ doRequestAndSaveDataToMySQL(Poco::Net::HTTPClientSession &httpClientSession, Poc
     Poco::Data::Session session(Poco::Data::SessionFactory::instance().create(Poco::Data::MySQL::Connector::KEY, str));
 
     session << "DROP TABLE IF EXISTS todos", now;
-    session << "CREATE TABLE todos (id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, userId INTEGER(3), title VARCHAR(30), completed TINYINT)", now;
+    session << "CREATE TABLE todos (id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, userId INTEGER(6), title VARCHAR(255), completed TINYINT)", now;
 
     // (re)create table
     httpClientSession.sendRequest(request);
     std::istream &rs = httpClientSession.receiveResponse(response);
 
-    Php::out << response.getStatus() << " - " << response.getReason() << std::endl;
     if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED) {
         std::string responseStr;
         StreamCopier::copyToString(rs, responseStr);
@@ -73,7 +71,22 @@ doRequestAndSaveDataToMySQL(Poco::Net::HTTPClientSession &httpClientSession, Poc
         Array::ConstIterator it;
 
         for (it = arr->begin(); it != arr->end(); it++) {
-            Php::out << "todo:" << it->convert<std::string>() << std::endl;
+            Object::Ptr obj = it->extract<Object::Ptr>();
+            ToDo toDo = {
+                    obj->get("userId").convert<int>(),
+                    obj->get("title").convert<std::string>(),
+                    obj->get("userId").convert<bool>(),
+            };
+            Poco::Data::Statement insert(session);
+            try {
+                insert << "INSERT INTO todos (`userId`, `title`, `completed`) VALUES(?, ?, ?)",
+                        use(toDo.userId),
+                        use(toDo.title),
+                        use(toDo.completed);
+                insert.execute();
+            } catch (Poco::Data::MySQL::StatementException& exception) {
+                Php::out << exception.message() << std::endl;
+            }
         }
 
         return true;
@@ -104,8 +117,6 @@ Php::Value make_request_with_cpp(Php::Parameters &params) {
         std::cerr << "Invalid Request." << std::endl;
         return 1;
     }
-
-    return 1;
 }
 
 /**
