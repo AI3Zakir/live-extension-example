@@ -6,6 +6,8 @@
 #include <Poco/Path.h>
 #include <Poco/URI.h>
 #include <Poco/Exception.h>
+#include <Poco/JSON/Parser.h>
+#include <Poco/Dynamic/Var.h>
 #include <phpcpp.h>
 #include <iostream>
 #include <cstdlib>
@@ -20,6 +22,8 @@ using Poco::StreamCopier;
 using Poco::Path;
 using Poco::URI;
 using Poco::Exception;
+using namespace Poco::JSON;
+using Poco::Dynamic::Var;
 
 /**
  * Make request with POCO
@@ -39,7 +43,14 @@ doRequest(Poco::Net::HTTPClientSession &session, Poco::Net::HTTPRequest &request
         std::string responseStr;
         StreamCopier::copyToString(rs, responseStr);
 
-        Php::out << responseStr << std::endl;
+        Parser parser;
+        Var result = parser.parse(responseStr);
+        Array::Ptr arr = result.extract<Array::Ptr>();
+        Array::ConstIterator it;
+
+        for (it = arr->begin(); it != arr->end(); it++) {
+            Php::out << "my children:" << it->convert<std::string>() << std::endl;
+        }
 
         return true;
     } else {
